@@ -7,6 +7,3 @@
 [submodule "ext/glew"]
     path = ext/glew
     url = https://github.com/nigels-com/glew
-[submodule "ext/enoki"]
-    path = ext/enoki
-    url = https://github.com/mitsuba-renderer/enoki
