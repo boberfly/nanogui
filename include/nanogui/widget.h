@@ -16,6 +16,7 @@
 #include <nanogui/theme.h>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 NAMESPACE_BEGIN(nanogui)
 
@@ -209,7 +210,7 @@ public:
     /// Check if the widget contains a certain position
     bool contains(const Vector2i &p) const {
         auto d = p-m_pos;
-        return enoki::all(d >= 0) && enoki::all(d < m_size);
+        return (d.x() >= 0 && d.y() >= 0) && (d.x() < m_size.x() && d.y() < m_size.y());
     }
 
     /// Determine the widget located at the given position value (recursive)

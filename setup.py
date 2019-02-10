@@ -16,6 +16,8 @@ headers = [
     'include/nanogui/colorwheel.h',
     'include/nanogui/combobox.h',
     'include/nanogui/common.h',
+    'include/nanogui/color.h',
+    'include/nanogui/vec_types.h',
     'include/nanogui/compat.h',
     'include/nanogui/entypo.h',
     'include/nanogui/formhelper.h',

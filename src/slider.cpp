@@ -61,7 +61,7 @@ bool Slider::mouse_button_event(const Vector2i &p, int /* button */, bool down, 
 }
 
 void Slider::draw(NVGcontext* ctx) {
-    Vector2f center = Vector2f(m_pos) + Vector2f(m_size) * 0.5f;
+    Vector2f center(m_pos.x() + m_size.x() * 0.5f, m_pos.y() + m_size.y() * 0.5f);
     float kr = (int) (m_size.y() * 0.4f), kshadow = 3;
 
     float start_x = kr + kshadow + m_pos.x();

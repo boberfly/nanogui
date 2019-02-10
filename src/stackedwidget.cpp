@@ -13,6 +13,7 @@
 */
 
 #include <nanogui/stackedwidget.h>
+#include <cassert>
 
 NAMESPACE_BEGIN(nanogui)
 
@@ -33,16 +34,21 @@ int StackedWidget::selected_index() const {
 
 void StackedWidget::perform_layout(NVGcontext *ctx) {
     for (auto child : m_children) {
-        child->set_position(Vector2i(0));
+        child->set_position(Vector2i(0,0));
         child->set_size(m_size);
         child->perform_layout(ctx);
     }
 }
 
 Vector2i StackedWidget::preferred_size(NVGcontext *ctx) const {
-    Vector2i size = Vector2i(0);
-    for (auto child : m_children)
-        size = max(size, child->preferred_size(ctx));
+    Vector2i size = Vector2i(0,0);
+    for (auto child : m_children) {
+        Vector2i child_size = child->preferred_size(ctx);
+        size = Vector2i(
+            std::max(size.x(), child_size.x()),
+            std::max(size.y(), child_size.y())
+        );
+    }
     return size;
 }
 

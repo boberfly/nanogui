@@ -44,7 +44,7 @@ void PopupButton::draw(NVGcontext* ctx) {
     if (m_chevron_icon) {
         auto icon = utf8(m_chevron_icon);
         NVGcolor text_color =
-            m_text_color.w() == 0 ? m_theme->m_text_color : m_text_color;
+            m_text_color.a() == 0 ? m_theme->m_text_color : m_text_color;
 
         nvgFontSize(ctx, (m_font_size < 0 ? m_theme->m_button_font_size : m_font_size) * icon_scale());
         nvgFontFace(ctx, "icons");

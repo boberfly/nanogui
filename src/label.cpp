@@ -34,7 +34,7 @@ void Label::set_theme(Theme *theme) {
 
 Vector2i Label::preferred_size(NVGcontext *ctx) const {
     if (m_caption == "")
-        return Vector2i(0);
+        return Vector2i(0, 0);
     nvgFontFace(ctx, m_font.c_str());
     nvgFontSize(ctx, font_size());
     if (m_fixed_size.x() > 0) {

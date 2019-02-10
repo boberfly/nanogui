@@ -17,6 +17,7 @@
 
 #include <nanogui/compat.h>
 #include <nanogui/object.h>
+#include <nanogui/vec_types.h>
 #include <unordered_map>
 
 NAMESPACE_BEGIN(nanogui)
@@ -261,9 +262,11 @@ public:
     GridLayout(Orientation orientation = Orientation::Horizontal, int resolution = 2,
                Alignment alignment = Alignment::Middle,
                int margin = 0, int spacing = 0)
-        : m_orientation(orientation), m_resolution(resolution), m_margin(margin) {
+        : m_orientation(orientation), 
+        m_resolution(resolution), 
+        m_spacing(spacing, spacing), 
+        m_margin(margin) {
         m_default_alignment[0] = m_default_alignment[1] = alignment;
-        m_spacing = Vector2i(spacing);
     }
 
     /// The Orientation of this GridLayout.

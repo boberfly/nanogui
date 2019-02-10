@@ -400,6 +400,8 @@ add_library(nanogui-obj OBJECT
   nanogui_resources.cpp
   include/nanogui/glutil.h src/glutil.cpp
   include/nanogui/common.h src/common.cpp
+  include/nanogui/vec_types.h
+  include/nanogui/color.h
   include/nanogui/widget.h src/widget.cpp
   include/nanogui/theme.h src/theme.cpp
   include/nanogui/layout.h src/layout.cpp

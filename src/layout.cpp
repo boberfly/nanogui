@@ -27,7 +27,7 @@ BoxLayout::BoxLayout(Orientation orientation, Alignment alignment,
 }
 
 Vector2i BoxLayout::preferred_size(NVGcontext *ctx, const Widget *widget) const {
-    Vector2i size(2*m_margin);
+    Vector2i size(2*m_margin, 2*m_margin);
 
     int y_offset = 0;
     const Window *window = dynamic_cast<const Window *>(widget);
@@ -220,7 +220,7 @@ void GridLayout::compute_layout(NVGcontext *ctx, const Widget *widget, std::vect
     for (auto w : widget->children())
         visible_children += w->visible() ? 1 : 0;
 
-    Vector2i dim;
+    Vector2i dim(0, 0);
     dim[axis1] = m_resolution;
     dim[axis2] = (int) ((visible_children + m_resolution - 1) / m_resolution);
 
@@ -262,7 +262,7 @@ void GridLayout::perform_layout(NVGcontext *ctx, Widget *widget) const {
     compute_layout(ctx, widget, grid);
     int dim[2] = { (int) grid[0].size(), (int) grid[1].size() };
 
-    Vector2i extra(0);
+    Vector2i extra(0, 0);
     const Window *window = dynamic_cast<const Window *>(widget);
     if (window && !window->title().empty())
         extra[1] += widget->theme()->m_window_header_height - m_margin / 2;
@@ -289,7 +289,7 @@ void GridLayout::perform_layout(NVGcontext *ctx, Widget *widget) const {
     }
 
     int axis1 = (int) m_orientation, axis2 = (axis1 + 1) % 2;
-    Vector2i start = m_margin + extra;
+    Vector2i start(m_margin + extra.x(), m_margin + extra.y());
 
     size_t num_children = widget->children().size();
     size_t child = 0;
@@ -356,7 +356,7 @@ Vector2i AdvancedGridLayout::preferred_size(NVGcontext *ctx, const Widget *widge
         std::accumulate(grid[0].begin(), grid[0].end(), 0),
         std::accumulate(grid[1].begin(), grid[1].end(), 0));
 
-    Vector2i extra(2 * m_margin);
+    Vector2i extra(2*m_margin, 2*m_margin);
     const Window *window = dynamic_cast<const Window *>(widget);
     if (window && !window->title().empty())
         extra[1] += widget->theme()->m_window_header_height - m_margin/2;
@@ -421,12 +421,12 @@ void AdvancedGridLayout::compute_layout(NVGcontext *ctx, const Widget *widget,
         fs_w[1] ? fs_w[1] : widget->height()
     );
 
-    Vector2i extra(2 * m_margin);
+    Vector2i extra(2*m_margin, 2*m_margin);
     const Window *window = dynamic_cast<const Window *>(widget);
     if (window && !window->title().empty())
         extra[1] += widget->theme()->m_window_header_height - m_margin/2;
 
-    container_size -= extra;
+    container_size = container_size - extra;
 
     for (int axis=0; axis<2; ++axis) {
         std::vector<int> &grid = _grid[axis];

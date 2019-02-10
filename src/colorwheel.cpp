@@ -14,7 +14,7 @@
 #include <nanogui/colorwheel.h>
 #include <nanogui/theme.h>
 #include <nanogui/opengl.h>
-#include <enoki/matrix.h>
+#include <algorithm>
 
 NAMESPACE_BEGIN(nanogui)
 
@@ -24,7 +24,7 @@ ColorWheel::ColorWheel(Widget *parent, const Color& rgb)
 }
 
 Vector2i ColorWheel::preferred_size(NVGcontext *) const {
-    return { 100, 100. };
+    return Vector2i(100, 100);
 }
 
 void ColorWheel::draw(NVGcontext *ctx) {
@@ -185,9 +185,10 @@ ColorWheel::Region ColorWheel::adjust_position(const Vector2i &p, Region conside
         return OuterCircle;
     }
 
-    auto sc = enoki::sincos(-m_hue * 2 * NVG_PI);
-    Vector2f xy(sc.second * x - sc.first * y,
-                sc.first * x + sc.second * y);
+    float cos = std::cosf(-m_hue * 2 * NVG_PI);
+    float sin = std::sinf(-m_hue * 2 * NVG_PI);
+    Vector2f xy(cos * x - sin * y,
+                sin * x + cos * y);
 
     float r = r0 - 6;
     float l0 = (r-xy.x() + std::sqrt(3) * xy.y()) / (3*r);
@@ -244,11 +245,15 @@ Color ColorWheel::color() const {
     Color rgb    = hue2rgb(m_hue);
     Color black  { 0.f, 0.f, 0.f, 1.f };
     Color white  { 1.f, 1.f, 1.f, 1.f };
-    return rgb * (1 - m_white - m_black) + black * m_black + white * m_white;
+    return Color(
+        rgb.r() * (1 - m_white - m_black) + black.r() * m_black + white.r() * m_white,
+        rgb.g() * (1 - m_white - m_black) + black.g() * m_black + white.g() * m_white,
+        rgb.b() * (1 - m_white - m_black) + black.b() * m_black + white.b() * m_white,
+        rgb.a() * (1 - m_white - m_black) + black.a() * m_black + white.a() * m_white);
 }
 
 void ColorWheel::set_color(const Color &rgb) {
-    float r = rgb[0], g = rgb[1], b = rgb[2];
+    float r = rgb.r(), g = rgb.g(), b = rgb.b();
 
     float M = std::max({ r, g, b });
     float m = std::min({ r, g, b });
@@ -270,8 +275,8 @@ void ColorWheel::set_color(const Color &rgb) {
         h /= 6;
 
         Color ch = hue2rgb(m_hue);
-        float M2 = std::max({ ch[0], ch[1], ch[2] });
-        float m2 = std::min({ ch[0], ch[1], ch[2] });
+        float M2 = std::max({ ch.r(), ch.g(), ch.b() });
+        float m2 = std::min({ ch.r(), ch.g(), ch.b() });
 
         m_white = (M*m2 - m*M2) / (m2 - M2);
         m_black = (M + m2 + m*M2 - m - M*m2 - M2) / (m2 - M2);

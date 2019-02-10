@@ -14,6 +14,7 @@
 #include <nanogui/opengl.h>
 #include <nanogui/screen.h>
 #include <nanogui/layout.h>
+#include <algorithm>
 
 NAMESPACE_BEGIN(nanogui)
 
@@ -33,10 +34,10 @@ Vector2i Window::preferred_size(NVGcontext *ctx) const {
     float bounds[4];
     nvgTextBounds(ctx, 0, 0, m_title.c_str(), nullptr, bounds);
 
-    return max(result, Vector2i(
-        bounds[2]-bounds[0] + 20,
-        bounds[3]-bounds[1]
-    ));
+    return Vector2i(
+        std::max(result.x(), static_cast<int32_t>(bounds[2]-bounds[0] + 20)),
+        std::max(result.y(), static_cast<int32_t>(bounds[3]-bounds[1]))
+    );
 }
 
 Widget *Window::button_panel() {
@@ -165,9 +166,11 @@ bool Window::mouse_enter_event(const Vector2i &p, bool enter) {
 bool Window::mouse_drag_event(const Vector2i &, const Vector2i &rel,
                             int button, int /* modifiers */) {
     if (m_drag && (button & (1 << GLFW_MOUSE_BUTTON_1)) != 0) {
-        m_pos += rel;
-        m_pos = max(m_pos, Vector2i(0));
-        m_pos = min(m_pos, parent()->size() - m_size);
+        Vector2i size = parent()->size() - m_size;
+        m_pos = Vector2i(
+            std::min(std::max(m_pos.x() + rel.x(), 0), size.x()),
+            std::min(std::max(m_pos.y() + rel.y(), 0), size.y())
+        );
         return true;
     }
     return false;

@@ -50,7 +50,7 @@ void Graph::draw(NVGcontext *ctx) {
     nvgLineTo(ctx, m_pos.x() + m_size.x(), m_pos.y() + m_size.y());
     nvgStrokeColor(ctx, m_stroke_color);
     nvgStroke(ctx);
-    if (m_fill_color.w() > 0) {
+    if (m_fill_color.a() > 0) {
         nvgFillColor(ctx, m_fill_color);
         nvgFill(ctx);
     }

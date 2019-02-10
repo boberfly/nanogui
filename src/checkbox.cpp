@@ -45,7 +45,7 @@ bool CheckBox::mouse_button_event(const Vector2i &p, int button, bool down,
 }
 
 Vector2i CheckBox::preferred_size(NVGcontext *ctx) const {
-    if (m_fixed_size != Vector2i(0))
+    if (m_fixed_size.x() != 0 || m_fixed_size.y() != 0)
         return m_fixed_size;
     nvgFontSize(ctx, font_size());
     nvgFontFace(ctx, "sans");

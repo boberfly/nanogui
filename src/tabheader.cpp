@@ -15,6 +15,7 @@
 #include <nanogui/theme.h>
 #include <nanogui/opengl.h>
 #include <numeric>
+#include <cassert>
 
 NAMESPACE_BEGIN(nanogui)
 
@@ -257,7 +258,7 @@ void TabHeader::ensure_tab_visible(int index) {
 
 std::pair<Vector2i, Vector2i> TabHeader::visible_button_area() const {
     if (m_visible_start == m_visible_end)
-        return { Vector2i(0), Vector2i(0) };
+        return { Vector2i(0,0), Vector2i(0,0) };
     auto top_left = m_pos + Vector2i(theme()->m_tab_control_width, 0);
     auto width = std::accumulate(visible_begin(), visible_end(), theme()->m_tab_control_width,
                                  [](int acc, const TabButton& tb) {
@@ -269,7 +270,7 @@ std::pair<Vector2i, Vector2i> TabHeader::visible_button_area() const {
 
 std::pair<Vector2i, Vector2i> TabHeader::active_button_area() const {
     if (m_visible_start == m_visible_end || m_active_tab < m_visible_start || m_active_tab >= m_visible_end)
-        return { Vector2i(0), Vector2i(0) };
+        return { Vector2i(0,0), Vector2i(0,0) };
     auto width = std::accumulate(visible_begin(), active_iterator(), theme()->m_tab_control_width,
                                  [](int acc, const TabButton& tb) {
         return acc + tb.size().x();
@@ -282,7 +283,7 @@ std::pair<Vector2i, Vector2i> TabHeader::active_button_area() const {
 void TabHeader::perform_layout(NVGcontext* ctx) {
     Widget::perform_layout(ctx);
 
-    Vector2i current_position = Vector2i(0);
+    Vector2i current_position = Vector2i(0,0);
     // Place the tab buttons relative to the beginning of the tab header.
     for (auto& tab : m_tab_buttons) {
         auto tab_preferred = tab.preferred_size(ctx);
@@ -368,7 +369,7 @@ void TabHeader::draw(NVGcontext* ctx) {
 
     // Flag to draw the active tab last. Looks a little bit better.
     bool draw_active = false;
-    Vector2i active_position = Vector2i(0);
+    Vector2i active_position = Vector2i(0,0);
 
     // Draw inactive visible buttons.
     while (current != last) {
@@ -421,7 +422,7 @@ void TabHeader::draw_controls(NVGcontext* ctx) {
     nvgTextAlign(ctx, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
     float y_scale_left = 0.5f;
     float x_scale_left = 0.2f;
-    Vector2f left_icon_pos = Vector2f(m_pos) + Vector2f(x_scale_left*theme()->m_tab_control_width, y_scale_left*m_size.y());
+    Vector2f left_icon_pos = Vector2f(m_pos.x(), m_pos.y()) + Vector2f(x_scale_left*theme()->m_tab_control_width, y_scale_left*m_size.y());
     nvgText(ctx, left_icon_pos.x(), left_icon_pos.y() + 1, icon_left.data(), nullptr);
 
     // Right button.
@@ -443,7 +444,7 @@ void TabHeader::draw_controls(NVGcontext* ctx) {
     nvgTextAlign(ctx, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
     float y_scale_right = .5f;
     float x_scale_right = 1.f - x_scale_left - right_width / theme()->m_tab_control_width;
-    Vector2f right_icon_pos = Vector2f(m_pos) + Vector2f((float) m_size.x(), (float) m_size.y()*y_scale_right) -
+    Vector2f right_icon_pos = Vector2f(m_pos.x(), m_pos.y()) + Vector2f((float) m_size.x(), (float) m_size.y()*y_scale_right) -
                             Vector2f(x_scale_right*theme()->m_tab_control_width + right_width, 0);
 
     nvgText(ctx, right_icon_pos.x(), right_icon_pos.y() + 1, icon_right.data(), nullptr);
@@ -451,11 +452,17 @@ void TabHeader::draw_controls(NVGcontext* ctx) {
 
 TabHeader::ClickLocation TabHeader::locate_click(const Vector2i& p) {
     auto left_distance = p - m_pos;
-    bool hit_left = all(left_distance >= 0) && all(left_distance < Vector2i(theme()->m_tab_control_width, m_size.y()));
+    bool hit_left = left_distance.x() >= 0
+        && left_distance.y() >= 0
+        && left_distance.x() < theme()->m_tab_control_width
+        && left_distance.y() < m_size.y();
     if (hit_left)
         return ClickLocation::LeftControls;
     auto right_distance = p - (m_pos + Vector2i(m_size.x() - theme()->m_tab_control_width, 0));
-    bool hit_right = all(right_distance >= 0) && all(right_distance < Vector2i(theme()->m_tab_control_width, m_size.y()));
+    bool hit_right = right_distance.x() >= 0 
+        && right_distance.y() >= 0
+        && right_distance.x() < theme()->m_tab_control_width
+        && right_distance.y() < m_size.y();
     if (hit_right)
         return ClickLocation::RightControls;
     return ClickLocation::TabButtons;

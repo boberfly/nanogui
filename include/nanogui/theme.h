@@ -17,6 +17,7 @@
 #pragma once
 
 #include <nanogui/common.h>
+#include <nanogui/color.h>
 #include <nanogui/object.h>
 
 NAMESPACE_BEGIN(nanogui)

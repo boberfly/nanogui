@@ -18,14 +18,14 @@ NAMESPACE_BEGIN(nanogui)
 
 Popup::Popup(Widget *parent, Window *parent_window)
     : Window(parent, ""), m_parent_window(parent_window),
-      m_anchor_pos(Vector2i(0)), m_anchor_height(30), m_side(Side::Right) {
+      m_anchor_pos(Vector2i(0, 0)), m_anchor_height(30), m_side(Side::Right) {
 }
 
 void Popup::perform_layout(NVGcontext *ctx) {
     if (m_layout || m_children.size() != 1) {
         Widget::perform_layout(ctx);
     } else {
-        m_children[0]->set_position(Vector2i(0));
+        m_children[0]->set_position(Vector2i(0, 0));
         m_children[0]->set_size(m_size);
         m_children[0]->perform_layout(ctx);
     }

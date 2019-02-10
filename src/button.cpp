@@ -126,14 +126,14 @@ void Button::draw(NVGcontext *ctx) {
     nvgRoundedRect(ctx, m_pos.x() + 1, m_pos.y() + 1.0f, m_size.x() - 2,
                    m_size.y() - 2, m_theme->m_button_corner_radius - 1);
 
-    if (m_background_color.w() != 0) {
-        nvgFillColor(ctx, Color(m_background_color[0], m_background_color[1],
-                                m_background_color[2], 1.f));
+    if (m_background_color.a() != 0) {
+        nvgFillColor(ctx, Color(m_background_color.r(), m_background_color.g(),
+                                m_background_color.b(), 1.f));
         nvgFill(ctx);
         if (m_pushed) {
             grad_top.a = grad_bot.a = 0.8f;
         } else {
-            double v = 1 - m_background_color.w();
+            double v = 1 - m_background_color.a();
             grad_top.a = grad_bot.a = m_enabled ? v : v * .5f + .5f;
         }
     }
@@ -162,10 +162,10 @@ void Button::draw(NVGcontext *ctx) {
     nvgFontFace(ctx, "sans-bold");
     float tw = nvgTextBounds(ctx, 0,0, m_caption.c_str(), nullptr, nullptr);
 
-    Vector2f center = Vector2f(m_pos) + Vector2f(m_size) * 0.5f;
+    Vector2f center(m_pos.x() + m_size.x() * 0.5f, m_pos.y() + m_size.y() * 0.5f);
     Vector2f text_pos(center.x() - tw * 0.5f, center.y() - 1);
     NVGcolor text_color =
-        m_text_color.w() == 0 ? m_theme->m_text_color : m_text_color;
+        m_text_color.a() == 0 ? m_theme->m_text_color : m_text_color;
     if (!m_enabled)
         text_color = m_theme->m_disabled_text_color;
 

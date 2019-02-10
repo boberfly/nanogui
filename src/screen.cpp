@@ -214,7 +214,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
 
     glfwGetFramebufferSize(m_glfw_window, &m_fbsize[0], &m_fbsize[1]);
     glViewport(0, 0, m_fbsize[0], m_fbsize[1]);
-    glClearColor(m_background[0], m_background[1], m_background[2], m_background[3]);
+    glClearColor(m_background.r(), m_background.g(), m_background.b(), m_background.a());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glfwSwapInterval(0);
     glfwSwapBuffers(m_glfw_window);
@@ -405,7 +405,7 @@ void Screen::initialize(GLFWwindow *window, bool shutdown_glfw) {
 
     m_visible = glfwGetWindowAttrib(window, GLFW_VISIBLE) != 0;
     set_theme(new Theme(m_nvg_context));
-    m_mouse_pos = Vector2i(0);
+    m_mouse_pos = Vector2i(0,0);
     m_mouse_state = m_modifiers = 0;
     m_drag_active = false;
     m_last_interaction = glfwGetTime();
@@ -482,14 +482,14 @@ void Screen::draw_all() {
 
 #if defined(_WIN32) || defined(__linux__) || defined(EMSCRIPTEN)
         m_fbsize = m_size;
-        m_size = Vector2i(Vector2f(m_size) / m_pixel_ratio);
+        m_size = Vector2i(m_size.x() / m_pixel_ratio, m_size.y() / m_pixel_ratio);
 #else
         /* Recompute pixel ratio on OSX */
         if (m_size[0])
             m_pixel_ratio = (float) m_fbsize[0] / (float) m_size[0];
 #endif
 
-        glClearColor(m_background[0], m_background[1], m_background[2], m_background[3]);
+        glClearColor(m_background.r(), m_background.g(), m_background.b(), m_background.a());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         glViewport(0, 0, m_fbsize[0], m_fbsize[1]);
@@ -597,12 +597,12 @@ void Screen::cursor_pos_callback_event(double x, double y) {
     Vector2i p((int) x, (int) y);
 
 #if defined(_WIN32) || defined(__linux__) || defined(EMSCRIPTEN)
-    p = Vector2i(Vector2f(p) / m_pixel_ratio);
+    p = Vector2i(p.x() / m_pixel_ratio, p.y() / m_pixel_ratio);
 #endif
 
     m_last_interaction = glfwGetTime();
     try {
-        p -= Vector2i(1, 2);
+        p = p - Vector2i(1, 2);
 
         bool ret = false;
         if (!m_drag_active) {
@@ -725,12 +725,12 @@ void Screen::resize_callback_event(int, int) {
     Vector2i fb_size, size;
     glfwGetFramebufferSize(m_glfw_window, &fb_size[0], &fb_size[1]);
     glfwGetWindowSize(m_glfw_window, &size[0], &size[1]);
-    if (m_fbsize == Vector2i(0, 0) || size == Vector2i(0, 0))
+    if ((m_fbsize.x() == 0 && m_fbsize.y() == 0) || (size.x() && size.y() == 0))
         return;
     m_fbsize = fb_size; m_size = size;
 
 #if defined(_WIN32) || defined(__linux__) || defined(EMSCRIPTEN)
-    m_size = Vector2i(Vector2f(m_size) / m_pixel_ratio);
+    m_size = Vector2i(m_size.x() / m_pixel_ratio, m_size.y() / m_pixel_ratio);
 #endif
 
     m_last_interaction = glfwGetTime();
@@ -773,11 +773,15 @@ void Screen::dispose_window(Window *window) {
 }
 
 void Screen::center_window(Window *window) {
-    if (window->size() == 0) {
+    if (window->size().x() == 0 && window->size().y() == 0) {
         window->set_size(window->preferred_size(m_nvg_context));
         window->perform_layout(m_nvg_context);
     }
-    window->set_position((m_size - window->size()) / 2);
+    window->set_position(
+        Vector2i(
+            (m_size.x() - window->size().x()) / 2,
+            (m_size.y() - window->size().y()) / 2
+        ));
 }
 
 void Screen::move_window_to_front(Window *window) {
