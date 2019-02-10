@@ -9,6 +9,8 @@
     BSD-style license that can be found in the LICENSE.txt file.
 */
 
+#if defined(NANOGUI_USE_GLWIDGETS)
+
 #include <nanogui/glutil.h>
 #include <iostream>
 #include <fstream>
@@ -503,3 +505,5 @@ void GLFramebuffer::download_tga(const std::string &filename) {
 }
 
 NAMESPACE_END(nanogui)
+
+#endif

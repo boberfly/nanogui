@@ -12,6 +12,8 @@
 
 #pragma once
 
+#if defined(NANOGUI_USE_GLWIDGETS)
+
 #include <nanogui/opengl.h>
 #include <enoki/transform.h>
 #include <enoki/quaternion.h>
@@ -662,3 +664,5 @@ protected:
 
 
 NAMESPACE_END(nanogui)
+
+#endif

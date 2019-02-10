@@ -22,6 +22,8 @@
 #        define GLAD_GLAPI_EXPORT
 #      endif
 #      include <glad/glad.h>
+#    elif defined(NANOGUI_GL3W)
+#      include <GL/gl3w.h>
 #    else
 #      if defined(__APPLE__)
 #        define GLFW_INCLUDE_GLCOREARB

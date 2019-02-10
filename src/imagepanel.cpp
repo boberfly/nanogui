@@ -10,6 +10,8 @@
     BSD-style license that can be found in the LICENSE.txt file.
 */
 
+#if defined(NANOGUI_USE_GLWIDGETS)
+
 #include <nanogui/imagepanel.h>
 #include <nanogui/opengl.h>
 
@@ -110,3 +112,5 @@ void ImagePanel::draw(NVGcontext* ctx) {
 }
 
 NAMESPACE_END(nanogui)
+
+#endif

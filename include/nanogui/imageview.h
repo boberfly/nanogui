@@ -14,6 +14,8 @@
 
 #pragma once
 
+#if defined(NANOGUI_USE_GLWIDGETS)
+
 #include <nanogui/widget.h>
 #include <nanogui/glutil.h>
 #include <functional>
@@ -170,3 +172,5 @@ private:
 };
 
 NAMESPACE_END(nanogui)
+
+#endif

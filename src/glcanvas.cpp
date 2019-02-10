@@ -12,6 +12,8 @@
     BSD-style license that can be found in the LICENSE.txt file.
 */
 
+#if defined(NANOGUI_USE_GLWIDGETS)
+
 #include <nanogui/window.h>
 #include <nanogui/screen.h>
 #include <nanogui/glcanvas.h>
@@ -76,3 +78,5 @@ void GLCanvas::draw(NVGcontext *ctx) {
 }
 
 NAMESPACE_END(nanogui)
+
+#endif

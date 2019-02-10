@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 3.12)
 
 project(nanogui)
 
@@ -9,7 +9,7 @@ if (POLICY CMP0068)
   cmake_policy(SET CMP0068 NEW) # RPATH settings on macOS don't affect install_name.
 endif()
 
-if (NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/src")
+if (NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/ext/nanovg/src")
   message(FATAL_ERROR "The NanoGUI dependency repositories (GLFW, etc.) are missing! "
     "You probably did not clone the project with --recursive. It is possible to recover "
     "by calling \"git submodule update --init --recursive\"")
@@ -61,6 +61,7 @@ option(NANOGUI_BUILD_EXAMPLES "Build NanoGUI example application?" ON)
 option(NANOGUI_BUILD_SHARED   "Build NanoGUI as a shared library?" ${NANOGUI_BUILD_SHARED_DEFAULT})
 option(NANOGUI_BUILD_PYTHON   "Build a Python plugin for NanoGUI?" ${NANOGUI_USE_PYTHON_DEFAULT})
 option(NANOGUI_USE_GLAD       "Use Glad OpenGL loader library?" ${NANOGUI_USE_GLAD_DEFAULT})
+option(NANOGUI_USE_GL3W       "Use gl3w OpenGL loader library?" OFF)
 option(NANOGUI_BUILD_GLFW     "Build GLFW" ${NANOGUI_BUILD_GLFW_DEFAULT})
 option(NANOGUI_INSTALL        "Install NanoGUI on `make install`?" ON)
 option(NANOGUI_USE_OPENGL     "Use OpenGL backend?" ${NANOGUI_USE_OPENGL_DEFAULT})
@@ -69,13 +70,18 @@ option(NANOGUI_USE_GLES2      "Use GLES2 backend?" ${NANOGUI_USE_GLES2_DEFAULT})
 set(NANOGUI_PYTHON_VERSION "" CACHE STRING "Python version to use for compiling the Python plugin")
 
 # Allow overriding the pybind11 and Enoki version used to compile NanoGUI
-set(ENOKI_PYBIND11_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/enoki/ext/pybind11"
-  CACHE STRING "Path containing the 'pybind11' library used to compile Enoki.")
-set(NANOGUI_PYBIND11_DIR "${ENOKI_PYBIND11_DIR}"
-  CACHE STRING "Path containing the 'pybind11' library used to compile nanogui.")
-set(NANOGUI_ENOKI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/enoki"
-  CACHE STRING "Path containing the 'enoki' library used to compile nanogui.")
-mark_as_advanced(ENOKI_PYBIND11_DIR NANOGUI_PYBIND11_DIR NANOGUI_ENOKI_DIR)
+#set(ENOKI_PYBIND11_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/enoki/ext/pybind11"
+#  CACHE STRING "Path containing the 'pybind11' library used to compile Enoki.")
+#set(NANOGUI_PYBIND11_DIR "${ENOKI_PYBIND11_DIR}"
+#  CACHE STRING "Path containing the 'pybind11' library used to compile nanogui.")
+#set(NANOGUI_ENOKI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/enoki"
+#  CACHE STRING "Path containing the 'enoki' library used to compile nanogui.")
+#mark_as_advanced(ENOKI_PYBIND11_DIR NANOGUI_PYBIND11_DIR NANOGUI_ENOKI_DIR)
+
+set(NANOGUI_GLFW_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw"
+  CACHE STRING "Path containing the 'glfw' library used to compile nanogui.")
+set(NANOGUI_GL3W_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/gl3w"
+  CACHE STRING "Path containing the 'gl3w' library used to compile nanogui.")
 
 # Required libraries, flags, and include files for compiling and linking against nanogui (all targets)
 set(NANOGUI_EXTRA_LIBS "")
@@ -121,10 +127,10 @@ macro(CHECK_CXX_COMPILER_AND_LINKER_FLAGS _RESULT _CXX_FLAGS _LINKER_FLAGS)
   set(CMAKE_REQUIRED_LIBRARIES "")
 endmacro()
 
-add_subdirectory("${NANOGUI_ENOKI_DIR}" "ext_build/enoki")
+#add_subdirectory("${NANOGUI_ENOKI_DIR}" "ext_build/enoki")
 
-enoki_set_compile_flags()
-enoki_set_native_flags()
+#enoki_set_compile_flags()
+#enoki_set_native_flags()
 
 # Python support: add NANOGUI_PYTHON flag to all targets
 if (NANOGUI_BUILD_PYTHON)
@@ -155,6 +161,8 @@ endif()
 if (MSVC)
   # Disable annoying MSVC warnings (all targets)
   add_definitions(/D "_CRT_SECURE_NO_WARNINGS")
+  add_definitions(/D "NOMINMAX")
+  list(APPEND NANOGUI_EXTRA_DEFS -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
 
   # Parallel build on MSVC (all targets)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
@@ -269,7 +277,7 @@ if (NANOGUI_BUILD_GLFW)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
   endif()
 
-  add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw"  "ext_build/glfw")
+  add_subdirectory("${NANOGUI_GLFW_DIR}"  "ext_build/glfw")
 
   # Two targets have now been defined: `glfw_objects`, which will be merged into
   # NanoGUI at the end, and `glfw`.  The `glfw` target is the library itself
@@ -294,10 +302,20 @@ if (NANOGUI_USE_GLAD)
   list(APPEND NANOGUI_EXTRA_INCS "${CMAKE_CURRENT_SOURCE_DIR}/ext/glad/include")
 endif()
 
+if (NANOGUI_USE_GL3W)
+  include_directories(${NANOGUI_GL3W_DIR}/include)
+  list(APPEND NANOGUI_EXTRA_DEFS -DNANOGUI_GL3W)
+  list(APPEND NANOGUI_EXTRA_INCS "${NANOGUI_GL3W_DIR}/include")
+  list(APPEND NANOGUI_EXTRA_LIBS gl3w)
+  
+  #add_subdirectory(${NANOGUI_GL3W_DIR} "ext_build/gl3w")
+  #target_link_libraries(nanogui PUBLIC gl3w)
+endif()
+
 list(APPEND NANOGUI_EXTRA_INCS
-  "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/include"
+  "${NANOGUI_GLFW_DIR}/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/ext/nanovg/src"
-  "${NANOGUI_ENOKI_DIR}/include"
+  #"${NANOGUI_ENOKI_DIR}/include"
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "BSD")
@@ -339,14 +357,14 @@ elseif (CMAKE_SYSTEM MATCHES "Linux" OR CMAKE_SYSTEM_NAME MATCHES "BSD")
 endif()
 
 include_directories(
-  ${NANOGUI_ENOKI_DIR}/include
+  #${NANOGUI_ENOKI_DIR}/include
   ext/nanovg/src
   include
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 if (NANOGUI_BUILD_GLFW)
-  include_directories(ext/glfw/include)
+  include_directories(${NANOGUI_GLFW_DIR}/include)
 endif()
 
 # Run simple cmake converter to put font files into the data segment
@@ -433,6 +451,12 @@ add_library(nanogui-obj OBJECT
   include/nanogui/nanogui.h
 )
 
+target_link_libraries(nanogui-obj PUBLIC gl3w)
+target_link_libraries(nanogui-obj PUBLIC glfw)
+target_compile_definitions(nanogui-obj PUBLIC ${NANOGUI_EXTRA_DEFS})
+target_include_directories(nanogui-obj PUBLIC ${NANOGUI_EXTRA_INCS})
+target_link_libraries(nanogui-obj PUBLIC ${NANOGUI_EXTRA_LIBS})
+
 set(NANOGUI_LIB_CONTENTS $<TARGET_OBJECTS:nanogui-obj>)
 if (CMAKE_GENERATOR STREQUAL Xcode)
   # XCode has a serious bug where the XCode project produces an invalid target
@@ -447,7 +471,7 @@ if (CMAKE_GENERATOR STREQUAL Xcode)
 endif()
 
 if (NANOGUI_BUILD_GLFW)
-  set(NANOGUI_LIB_CONTENTS ${NANOGUI_LIB_CONTENTS} $<TARGET_OBJECTS:glfw_objects>)
+  #set(NANOGUI_LIB_CONTENTS ${NANOGUI_LIB_CONTENTS} $<TARGET_OBJECTS:glfw_objects>)
 endif()
 
 add_library(nanogui ${NANOGUI_LIBRARY_TYPE} ${NANOGUI_LIB_CONTENTS})
@@ -526,7 +550,7 @@ if (NANOGUI_BUILD_PYTHON)
   endif()
 
   # Try to autodetect Python (can be overridden manually if needed)
-  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/ext/enoki/ext/pybind11/tools")
+  #list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/ext/enoki/ext/pybind11/tools")
   set(Python_ADDITIONAL_VERSIONS 3.7 3.6 3.5 3.4)
   find_package(PythonLibsNew ${NANOGUI_PYTHON_VERSION})
   if (NOT PYTHONLIBS_FOUND)
@@ -544,7 +568,7 @@ if (NANOGUI_BUILD_PYTHON)
   # Need PIC code in libnanogui even when compiled as a static library
   set_target_properties(nanogui-obj PROPERTIES POSITION_INDEPENDENT_CODE ON)
   if (NANOGUI_BUILD_GLFW)
-    set_target_properties(glfw_objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  #  set_target_properties(glfw_objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
   endif()
 
   include_directories("${NANOGUI_PYBIND11_DIR}/include" ${PYTHON_INCLUDE_DIR})

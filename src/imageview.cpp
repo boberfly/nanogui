@@ -11,6 +11,8 @@
     BSD-style license that can be found in the LICENSE.txt file.
 */
 
+#if defined(NANOGUI_USE_GLWIDGETS)
+
 #include <nanogui/imageview.h>
 #include <nanogui/window.h>
 #include <nanogui/screen.h>
@@ -479,3 +481,5 @@ void ImageView::write_pixel_info(NVGcontext* ctx, const Vector2f& cell_position,
 }
 
 NAMESPACE_END(nanogui)
+
+#endif

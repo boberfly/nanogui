@@ -13,6 +13,8 @@
 
 #pragma once
 
+#if defined(NANOGUI_USE_GLWIDGETS)
+
 #include <nanogui/widget.h>
 
 NAMESPACE_BEGIN(nanogui)
@@ -51,3 +53,5 @@ protected:
 };
 
 NAMESPACE_END(nanogui)
+
+#endif

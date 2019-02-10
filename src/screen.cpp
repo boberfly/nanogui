@@ -18,13 +18,14 @@
 #include <nanogui/popup.h>
 #include <map>
 #include <iostream>
+#include <string>
 
 #if defined(EMSCRIPTEN)
 #  include <emscripten/emscripten.h>
 #  include <emscripten/html5.h>
 #endif
 
-#if defined(_WIN32)
+/*#if defined(_WIN32)
 #  define NOMINMAX
 #  undef APIENTRY
 
@@ -34,7 +35,7 @@
 #  define GLFW_EXPOSE_NATIVE_WGL
 #  define GLFW_EXPOSE_NATIVE_WIN32
 #  include <GLFW/glfw3native.h>
-#endif
+#endif*/
 
 /* Allow enforcing the GL2 implementation of NanoVG */
 #if defined(NANOGUI_USE_OPENGL)
@@ -55,10 +56,10 @@ static bool glad_initialized = false;
 
 /* Calculate pixel ratio for hi-dpi devices. */
 static float get_pixel_ratio(GLFWwindow *window) {
-#if defined(_WIN32)
+/*#if defined(_WIN32)
     HWND hwnd = glfwGetWin32Window(window);
     HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
-    /* The following function only exists on Windows 8.1+, but we don't want to make that a dependency */
+    // The following function only exists on Windows 8.1+, but we don't want to make that a dependency
     static HRESULT (WINAPI *GetDpiForMonitor_)(HMONITOR, UINT, UINT*, UINT*) = nullptr;
     static bool GetDpiForMonitor_tried = false;
 
@@ -71,7 +72,7 @@ static float get_pixel_ratio(GLFWwindow *window) {
 
     if (GetDpiForMonitor_) {
         uint32_t dpi_x, dpi_y;
-        if (GetDpiForMonitor_(monitor, 0 /* effective DPI */, &dpi_x, &dpi_y) == S_OK)
+        if (GetDpiForMonitor_(monitor, 0, &dpi_x, &dpi_y) == S_OK)
             return dpi_x / 96.0;
     }
     return 1.f;
@@ -80,7 +81,7 @@ static float get_pixel_ratio(GLFWwindow *window) {
 
     float ratio = 1.0f;
     FILE *fp;
-    /* Try to read the pixel ratio from KDEs config */
+    // Try to read the pixel ratio from KDEs config
     auto currentDesktop = std::getenv("XDG_CURRENT_DESKTOP");
     if (currentDesktop && currentDesktop == std::string("KDE")) {
         fp = popen("kreadconfig5 --group KScreen --key ScaleFactor", "r");
@@ -90,7 +91,7 @@ static float get_pixel_ratio(GLFWwindow *window) {
         if (fscanf(fp, "%f", &ratio) != 1)
             return 1;
     } else {
-        /* Try to read the pixel ratio from GTK */
+        // Try to read the pixel ratio from GTK
         fp = popen("gsettings get org.gnome.desktop.interface scaling-factor", "r");
         if (!fp)
             return 1;
@@ -105,12 +106,12 @@ static float get_pixel_ratio(GLFWwindow *window) {
     return ratio >= 1 ? ratio : 1;
 #elif defined(EMSCRIPTEN)
     return emscripten_get_device_pixel_ratio();
-#else
+#else*/
     Vector2i fb_size, size;
     glfwGetFramebufferSize(window, &fb_size[0], &fb_size[1]);
     glfwGetWindowSize(window, &size[0], &size[1]);
     return (float)fb_size[0] / (float)size[0];
-#endif
+//#endif
 }
 
 #if defined(EMSCRIPTEN)
